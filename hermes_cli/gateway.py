@@ -6537,9 +6537,8 @@ def openrc_install(
     default_venv = "/root/.hermes/venv"
     default_home = "/root/.hermes"
 
-    init_script = f
-supervisor=supervise-daemon
-"""#!/sbin/openrc-run
+    init_script = f"""supervisor=supervise-daemon
+#!/sbin/openrc-run
 description="Hermes Gateway"
 # Load config if present
 [ -f /etc/conf.d/hermes-gateway ] && . /etc/conf.d/hermes-gateway
