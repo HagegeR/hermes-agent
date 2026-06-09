@@ -35,7 +35,12 @@ interface AppShellProps {
   mainOverlays?: ReactNode
   onOpenSettings: () => void
   overlays?: ReactNode
+  // Rails that sit at the window's left edge in the flipped layout but never
+  // force-collapse to hover-reveal overlays — so they cover the top-left traffic
+  // lights (and zero the titlebar inset) even below the collapse breakpoint.
+  previewPaneOpen?: boolean
   statusbarItems?: readonly StatusbarItem[]
+  terminalPaneOpen?: boolean
   titlebarTools?: readonly TitlebarTool[]
 }
 
@@ -61,7 +66,9 @@ export function AppShell({
   mainOverlays,
   onOpenSettings,
   overlays,
+  previewPaneOpen = false,
   statusbarItems,
+  terminalPaneOpen = false,
   titlebarTools
 }: AppShellProps) {
   const sidebarOpen = useStore($sidebarOpen)
@@ -81,10 +88,14 @@ export function AppShell({
 
   // The inset clears the top-left titlebar buttons when nothing covers the
   // window's left edge. Default layout: the sessions sidebar sits there.
-  // Flipped layout: the file browser does instead. Below the collapse
-  // breakpoint both rails are force-collapsed (hover-reveal overlay), so the
-  // edge is uncovered regardless of their stored open state.
-  const leftEdgePaneOpen = !narrowViewport && (panesFlipped ? fileBrowserOpen : sidebarOpen)
+  // Flipped layout: the file browser does instead. Both force-collapse to a
+  // hover-reveal overlay (0px track) below the collapse breakpoint, so the edge
+  // is uncovered there regardless of their stored open state.
+  const collapsibleLeftPaneOpen = panesFlipped ? fileBrowserOpen : sidebarOpen
+  // The terminal + preview rails never force-collapse, so when they're the
+  // leftmost open pane (flipped layout) they cover the edge even when narrow.
+  const persistentLeftPaneOpen = panesFlipped && (terminalPaneOpen || previewPaneOpen)
+  const leftEdgePaneOpen = (!narrowViewport && collapsibleLeftPaneOpen) || persistentLeftPaneOpen
 
   const titlebarContentInset = leftEdgePaneOpen
     ? 0

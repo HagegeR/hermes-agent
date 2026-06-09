@@ -9,6 +9,7 @@ import type { CSSProperties } from 'react'
 import { triggerHaptic } from '@/lib/haptics'
 import { useTheme } from '@/themes/context'
 
+import { makeTerminalReader, setActiveTerminalReader } from './buffer'
 import { isAddSelectionShortcut, terminalSelectionAnchor, terminalSelectionLabel, terminalTheme } from './selection'
 
 type TerminalStatus = 'closed' | 'open' | 'starting'
@@ -310,6 +311,10 @@ export function useTerminalSession({ cwd, onAddSelectionToChat }: UseTerminalSes
     term.loadAddon(new WebLinksAddon())
     term.unicode.activeVersion = '11'
 
+    // Let the GUI chat agent read this pane via the `read_terminal` tool: the
+    // gateway's terminal.read.request handler serializes the buffer through this.
+    setActiveTerminalReader(makeTerminalReader(term))
+
     const onDragOver = (e: DragEvent) => {
       if (!e.dataTransfer || !transferHasDropCandidates(e.dataTransfer)) {
         return
@@ -570,6 +575,7 @@ export function useTerminalSession({ cwd, onAddSelectionToChat }: UseTerminalSes
     return () => {
       disposed = true
       cleanup.forEach(run => run())
+      setActiveTerminalReader(null)
 
       const id = sessionIdRef.current
       sessionIdRef.current = null

@@ -50,9 +50,9 @@ import {
   $currentCwd,
   $freshDraftReady,
   $gatewayState,
+  $messagingSessions,
   $selectedStoredSessionId,
   $sessions,
-  $messagingSessions,
   $workingSessionIds,
   CRON_SECTION_LIMIT,
   getRecentlySettledSessionIds,
@@ -978,7 +978,9 @@ export function DesktopController() {
       mainOverlays={mainOverlays}
       onOpenSettings={openSettings}
       overlays={overlays}
+      previewPaneOpen={chatOpen && Boolean(previewTarget || filePreviewTarget)}
       statusbarItems={statusbarItems}
+      terminalPaneOpen={terminalSidebarOpen}
       titlebarTools={titlebarToolGroups.flat.right}
     >
       <Pane
