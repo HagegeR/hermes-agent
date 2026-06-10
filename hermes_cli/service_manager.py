@@ -151,6 +151,29 @@ def _s6_running() -> bool:
     return Path("/run/s6/basedir").is_dir()
 
 
+def _openrc_available() -> bool:
+    """Check if OpenRC's rc-service is available."""
+    try:
+        return shutil.which("rc-service") is not None
+    except Exception:
+        return False
+
+
+# Compatibility note
+# ----------------
+# The OpenRC backend shipped in this module as an upstream addition. On
+# Alpine Linux the gateway process is launched through ``supervise-daemon``/
+# ``rc-service`` in ``/etc/init.d/hermes-gateway``. In that launch path the
+# import machinery resolves ``gateway.slash_access`` differently from a plain
+# interactive Python run, so `ModuleNotFoundError: No module named 'gateway.slash_access'`
+# can appear if the working directory / ``PYTHONPATH`` is not set for the
+# editable install. This does NOT change the public interface of
+# ``OpenRCServiceManager``; it documents that operators may need to set
+# PYTHONPATH in the init script env or otherwise ensure the editable finder
+# is included on sys.path so submodules are importable in the service process.
+
+
+
 # ---------------------------------------------------------------------------
 # Backend wrappers
 #
